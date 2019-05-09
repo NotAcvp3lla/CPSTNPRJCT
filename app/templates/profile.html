@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %} Profile {% endblock %}
+
+{% block main %}
+<h1 class="page-header">Hello {{ user.user_name}}</h1>
+{% include 'flash_messages.html' %}
+<div class="card border-primary mb-3" style="max-width: 40rem;">
+<div class="row justify-content-center">
+    <div class="col-sm-12 col-md-6">
+        <div class="card card-profile text-left">
+                <img class="card-img-top rounded-circle profile-image" src="{{ url_for('static', filename='uploads/'+user.pic) }}" alt="Profile Pic"></img>
+        </div>
+    </div>
+    
+    <div class="col-sm-12 col-md-6">
+        <strong class="profile-name">{{ user.first_name}} {{ user.last_name }}</strong>
+        <div class="profile-info mb-2">
+          <div class="mb-3">
+              
+              <div class = "row">Username: {{ user.user_name}} </div>
+              <div class = "row">Gender: {{ user.gender}} </div>
+              <div class = "row">Email: {{ user.email}} </div>
+              <div class = "row">Role: {{ user.role}} </div>
+              
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
