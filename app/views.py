@@ -15,7 +15,14 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
 from flask_admin.contrib.sqla import ModelView
 from flask_admin import Admin
+from flask import Flask, jsonify
+from flask_simple_geoip import SimpleGeoIP
+from flask import request
+import json
+from flask_googlemaps import GoogleMaps
+from flask_googlemaps import Map
 import random
+
 
 
 ###
@@ -129,7 +136,7 @@ def newProfile():
             
             #Remember to add an Admin Account
             newUser = UserProfile(user_id=user_id, isAdmin = isAdmin , first_name=first_name, last_name=last_name, user_name=user_name,
-            password=password, gender=gender, email=emial, role=role, pic=filename)
+            password=password, gender=gender, email=email, role=role, pic=filename)
                 
             db.session.add(newUser)
             db.session.commit()
@@ -185,6 +192,33 @@ def profiles():
 
 ###################################################################################################################################
 
+@app.route("/mapview")
+def mapview():
+    # creating a map in the view
+    
+    mymap = Map(
+        identifier="view-side",
+        lat=18.00590323650142,
+        lng=-76.7447443812341,
+        markers=[
+          {
+             'icon': 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+             'lat': 18.00590323650142,
+             'lng': -76.7447443812341,
+             'infobox': "<b>Hello World</b>"
+          },
+          {
+             'icon': 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+             'lat': 18.00590323650142,
+             'lng': -76.7447443812341,
+             'infobox': "<b>Hello World from other place</b>"
+          }
+        ]
+    )
+    
+    return render_template('mapview.html',mymap=mymap)
+    
+####################################################################################################################################
 
 # user_loader callback. This callback is used to reload the user object from
 # the user ID stored in the session

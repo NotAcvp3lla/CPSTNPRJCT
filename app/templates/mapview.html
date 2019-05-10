@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block main %}
+    
+        
+        <h1>BusNav</h1>
+        
+        
+        <h2>map 1 eg.</h2>
+        {{"decoupled-map"|googlemap_html(18.00590323650142, -76.7447443812341)}}
+
+        {% with map=googlemap_obj("another-map", 18.00590323650142, -76.7447443812341, markers=[(18.00590323650142, -76.7447443812341), (18.00590323650142, -76.7447443812341)]) %}
+            {{map.html}}
+            {{map.js}}
+        {% endwith %}
+    
+        
+
+{% endblock %}
