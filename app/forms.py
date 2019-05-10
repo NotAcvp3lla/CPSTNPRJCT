@@ -6,18 +6,19 @@ from wtforms import validators, ValidationError
 
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[InputRequired()])
-    password = PasswordField('Password', validators=[InputRequired()])
+    user_name = StringField('Username: ', validators=[InputRequired()])
+    password = PasswordField('Password: ', validators=[InputRequired()])
+    remember_me = BooleanField('Remember me: ')
 
 class ProfileForm(Form):
-    first_name = TextField('FirstName', [validators.Required("(Required)")])
-    last_name = TextField('LastName', [validators.Required("(Required)")])
-    user_name = TextField('UserName', [validators.Required("(Required)")])
-    password = PasswordField('Password', validators=[DataRequired()])
-    gender = SelectField(label='Gender', choices=[("Select Gender", "Select Gender"), ("Male", "Male"), ("Female", "Female")])
-    email = TextField('Email',[validators.Required("(Required)")])
-    role = SelectField(label='Role', choices=[("Select Role", "Select Role"), ("Driver", "Driver"), ("Commuter", "Commuter")])
+    first_name = TextField('First Name: ', [validators.Required("(Required)")])
+    last_name = TextField('Last Name: ', [validators.Required("(Required)")])
+    user_name = TextField('Username: ', [validators.Required("(Required)")])
+    password = PasswordField('Password: ', validators=[DataRequired()])
+    gender = SelectField(label='Gender: ', choices=[("Select Gender", "Select Gender"), ("Male", "Male"), ("Female", "Female")])
+    email = TextField('Email: ',[validators.Required("(Required)")])
+    role = SelectField(label='Role: ', choices=[("Select Role", "Select Role"), ("Driver", "Driver"), ("Commuter", "Commuter")])
     
-    photo= FileField('Profile Photo', validators=[
+    photo= FileField('Profile Photo: ', validators=[
         FileRequired(),
         FileAllowed(['jpg','png','Images Only!'])])

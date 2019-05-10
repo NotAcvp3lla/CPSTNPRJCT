@@ -128,15 +128,15 @@ def newProfile():
             role = form.role.data
             
             isAdmin = "no"
-            pic = form.photo.data
-            filename = secure_filename(pic.filename)
-            pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            image = form.photo.data
+            filename = secure_filename(image.filename)
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             
-            user_id = generateUserId(first_name, last_name)
+            uid = generateUserId(first_name, last_name)
             
             #Remember to add an Admin Account
-            newUser = UserProfile(user_id=user_id, isAdmin = isAdmin , first_name=first_name, last_name=last_name, user_name=user_name,
-            password=password, gender=gender, email=email, role=role, pic=filename)
+            newUser = UserProfile(uid=uid, isAdmin = isAdmin , first_name=first_name, last_name=last_name, user_name=user_name,
+            password=password, gender=gender, email=email, role=role, image=filename)
                 
             db.session.add(newUser)
             db.session.commit()

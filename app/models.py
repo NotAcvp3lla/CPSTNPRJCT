@@ -6,24 +6,26 @@ from . import db
 
 class UserProfile(db.Model):
     uid = db.Column(db.Integer, primary_key=True)
-    firstname = db.Column(db.String(80))
-    lastname = db.Column(db.String(80))
+    first_name = db.Column(db.String(80))
+    last_name = db.Column(db.String(80))
     user_name = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
     gender= db.Column(db.String(6))
     email = db.Column(db.String(80))
     role = db.Column(db.String(80))
+    isAdmin = db.Column(db.String(6))
     image=db.Column(db.LargeBinary)
     
-    def __init__(self, uid, firstname, lastname, user_name, password, gender, email, role, image):
+    def __init__(self, uid, first_name, last_name, user_name, password, gender, email, role, isAdmin, image):
         self.uid=uid
-        self.firstname=firstname
-        self.lastname=lastname
+        self.first_name=first_name
+        self.last_name=last_name
         self.user_name
         self.password
         self.gender=gender
         self.email=email
         self.role=role
+        self.isAdmin=isAdmin
         self.image=image
 
     def is_authenticated(self):

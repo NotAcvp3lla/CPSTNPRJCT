@@ -6,7 +6,7 @@
     <form action = "{{url_for('newProfile')}}", method = "POST" enctype="multipart/form-data">
         {{ form.csrf_token }}
         
-      <div class="form-group">         
+      <div class="form-group col-md-6">         
        {{ form.first_name.label }}
         {% for message in form.first_name.errors %}
            <div class="text-danger">{{message}}</div>
@@ -14,7 +14,7 @@
        {{ form.first_name(class='form-control', placeholder="First Name")}} 
       </div>
       
-      <div class="form-group">         
+      <div class="form-group col-md-6">         
        {{ form.last_name.label }}
         {% for message in form.last_name.errors %}
            <div class="text-danger">{{message}}</div>
@@ -23,7 +23,7 @@
        
       </div>
       
-      <div class="form-group">         
+      <div class="form-group col-md-6">         
        {{ form.user_name.label }}
         {% for message in form.user_name.errors %}
            <div class="text-danger">{{message}}</div>
@@ -32,7 +32,7 @@
        
       </div>
       
-      <div class="form-group">         
+      <div class="form-group col-md-6">         
           {{ form.password.label }}
            {% for message in form.password.errors %}
               <div class="text-danger">{{message}}</div>
@@ -41,7 +41,7 @@
     
       </div>
       
-      <div class="form-group">         
+      <div class="form-group col-md-6">         
          {{ form.gender.label }} 
           {% for message in form.gender.errors %}
            <div class="text-danger">{{message}}</div>
@@ -60,7 +60,7 @@
         {{ form.email(class = "form-control", placeholder="eg. myname@example.com")}}
       </div>
       
-      <div class="form-group">         
+      <div class="form-group ">         
          {{ form.role.label }} 
           {% for message in form.role.errors %}
            <div class="text-danger">{{message}}</div>
