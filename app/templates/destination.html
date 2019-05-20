@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 
 {% block main %}
-    
+<div>
+    <!---<div class = "row">Distance: {{ dest }} </div>--->
+    <h2>Your Map</h2>
     {{"decoupled-map"|googlemap_html(lat, lng)}}
 
     {% with map=googlemap_obj("another-map", lat1, lng1 , markers=[( lat1, lng1), (lat2, lng2)]) %}
         {{map.html}}
         {{map.js}}
     {% endwith %}
+    
+</div>
 
         
     

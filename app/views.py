@@ -29,6 +29,7 @@ import random
 import hashlib
 from googlemaps import exceptions
 from datetime import datetime
+from math import sin, cos, sqrt, atan2
 
 
 
@@ -410,6 +411,23 @@ def destination(pointA,pointB):
     lat2 = details_json["result"]["geometry"]["location"]["lat"]
     lng2 = details_json["result"]["geometry"]["location"]["lng"]
     
+    """
+    R = 6373.0
+    
+    dlng = lng2 - lng1
+    dlat = lat2 - lat1
+    
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlng / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    #dist = R * c
+    
+    coords_1 = (lat1, lng1)
+    coords_2 = (lat2, lng2)
+
+    dist = geopy.distance.vincenty(coords_1, coords_2).km
+    """
+    
+    dest = []
     gmaps = googlemaps.Client(key=key)
     now = datetime.now()
     dest = gmaps.directions(pointA, pointB,mode="transit",departure_time=now)

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block main %}
-
+    
         
         {{"decoupled-map"|googlemap_html(lat, lng)}}
 
@@ -10,7 +10,7 @@
             {{map.js}}
         {% endwith %}
         
-        
+    
     
   
 {% endblock %}
