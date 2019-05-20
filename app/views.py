@@ -9,7 +9,7 @@ import os, datetime, random, re
 from app import app, db,login_manager
 from flask_login import login_user, logout_user, current_user, login_required
 from flask import render_template, request, redirect, url_for,flash,jsonify, make_response,session,abort
-from forms import ProfileForm,LoginForm
+from forms import ProfileForm,LoginForm, SearchForm
 from models import UserProfile
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
@@ -18,12 +18,18 @@ from flask_admin import Admin
 from flask import Flask, jsonify
 from flask_simple_geoip import SimpleGeoIP
 from flask import request
+import requests
 import json
+import googlemaps
 from flask_googlemaps import GoogleMaps
 from flask_googlemaps import Map
 import random
+import hashlib
+from googlemaps import exceptions
 
+simple_geoip = SimpleGeoIP(app)
 
+_GEOLOCATION_BASE_URL = "https://www.googleapis.com"
 
 ###
 # Routing for your application.
@@ -41,73 +47,6 @@ def about():
     return render_template('about.html')
 
 ##########################################################################################################################
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        # if user is already logged in, just redirect them to our secure page
-        # or some other page like a dashboard
-        return redirect(url_for('profile', user_id=current_user.user_id))
-
-    # Here we use a class of some kind to represent and validate our
-    # client-side form data. For example, WTForms is a library that will
-    # handle this for us, and we use a custom LoginForm to validate.
-    form = LoginForm()
-    # Login and validate the user.
-    if request.method == 'POST' and form.validate_on_submit():
-        # Query our database to see if the username and password entered
-        # match a user that is in the database.
-        user_name = form.user_name.data
-        password = form.password.data
-
-        # user = UserProfile.query.filter_by(username=username, password=password)\
-        # .first()
-        # or
-        user = UserProfile.query.filter_by(user_name=user_name).first()
-        # app.logger.debug(user)
-        if user is not None and check_password_hash(user.password, password):
-            remember_me = False
-
-            if 'remember_me' in request.form:
-                remember_me = True
-
-            # If the user is not blank, meaning if a user was actually found,
-            # then login the user and create the user session.
-            # user should be an instance of your `User` class
-            login_user(user, remember=remember_me)
-            
-            if user.isAdmin == "yes":
-                active = "active"
-            else:
-                active = "notactive"
-                
-            flash('Logged in successfully.', 'success')
-
-            next_page = request.args.get('next')
-            # app.logger.debug(next_page)
-            return render_template('profile.html', job=job,active=active,user=user)
-
-        else:
-            flash('Username or Password is incorrect.', 'danger')
-
-    flash_errors(form)
-    return render_template('login.html', form=form)
-
-#########################################################################################    
-@app.route("/logout")
-@login_required
-def logout():
-    # Logout the user and end the session
-    logout_user()
-    flash('You have been logged out.', 'danger')
-    return redirect(url_for('login'))
-    
-def flash_errors(form):
-    for field, errors in form.errors.items():
-        for error in errors:
-            flash(u"Error in the %s field - %s" % (
-                getattr(form, field).label.text,
-                error
-), 'danger')
 
 ###############################################################################################
 
@@ -147,16 +86,16 @@ def newProfile():
                 active = "notactive"
         
             flash("Profile Successfully Created", "success")
-            return redirect(url_for("profiles"))##########  #url_for('profile', user_id=user.user_id) use this just in case.
+            return redirect(url_for("profiles"))##########  #url_for('profile', uid=user.uid) use this just in case.
         return render_template('signup.html', form=form,active=active)
 
 ###############################################################################################################
 
-@app.route('/profile/<user_id>')
+@app.route('/profile/<uid>')
 @login_required
-def profile(user_id):
+def profile(uid):
     if current_user.is_authenticated:
-        user = UserProfile.query.filter_by(user_id=user_id).first()
+        user = UserProfile.query.filter_by(uid=uid).first()
         
         if current_user.isAdmin=="yes":
             active = "active"
@@ -172,7 +111,7 @@ def profile(user_id):
 @login_required
 def profiles():
     user_list = UserProfile.query.all()
-    users = [{"First Name": user.first_name, "Last Name": user.last_name, "user_id": user.user_id} for user in user_list]
+    users = [{"First Name": user.first_name, "Last Name": user.last_name, "user_id": user.uid} for user in user_list]
     
     if request.method == 'GET':
         if user_list is not None:
@@ -188,53 +127,163 @@ def profiles():
             return response
         else:
             flash('No Users Found', 'danger')
-            return redirect(url_for("home")) 
+            return redirect(url_for("home"))
+#################################################################################################################################################
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        # if user is already logged in, just redirect them to our secure page
+        # or some other page like a dashboard
+        return redirect(url_for('profile', uid=current_user.uid))
+
+    # Here we use a class of some kind to represent and validate our
+    # client-side form data. For example, WTForms is a library that will
+    # handle this for us, and we use a custom LoginForm to validate.
+    form = LoginForm()
+    # Login and validate the user.
+    if request.method == 'POST' and form.validate_on_submit():
+        # Query our database to see if the username and password entered
+        # match a user that is in the database.
+        user_name = form.user_name.data
+        password = form.password.data
+
+        # user = UserProfile.query.filter_by(username=username, password=password)\
+        # .first()
+        # or
+        user = UserProfile.query.filter_by(user_name=user_name).first()
+        #app.logger.debug(user)
+        if user is not None and (user.password == password):
+            remember_me = False
+
+            if 'remember_me' in request.form:
+                remember_me = True
+
+            # If the user is not blank, meaning if a user was actually found,
+            # then login the user and create the user session.
+            # user should be an instance of your `User` class
+            login_user(user, remember=remember_me)
+            
+            if user.isAdmin == "yes":
+                active = "active"
+            else:
+                active = "notactive"
+                
+            flash('Logged in successfully.', 'success')
+
+            next_page = request.args.get('next')
+            # app.logger.debug(next_page)
+            return render_template('profile.html',active=active,user=user)
+
+        else:
+            flash('Username or Password is incorrect.', 'danger')
+
+    flash_errors(form)
+    return render_template('login.html', form=form)
+    
+# user_loader callback. This callback is used to reload the user object from
+# the user ID stored in the session
+@login_manager.user_loader
+def load_user(uid):
+    return UserProfile.query.get(int(uid))
+
+#########################################################################################    
+@app.route("/logout")
+@login_required
+def logout():
+    # Logout the user and end the session
+    logout_user()
+    flash('You have been logged out.', 'danger')
+    return redirect(url_for('login'))
+    
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+), 'danger')
+
+
+###################################################################################################################################
+#@app.route("/locate")
+#def locate():
+    
+    #ip_request = request.args.get('https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE/v1/ip.json')
+    #my_ip = ip_request.json['ip']
+    #geo_request = request.get('https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE/v1/ip/geo/' +my_ip + '.json')
+    #geo_data = geo_request.json
+    
+    #lat = geo_data['latitude']
+    #lng = geo_data['longitude']
+
+
+
 
 ###################################################################################################################################
 
-@app.route("/mapview")
+@app.route('/mapview')
+@login_required
 def mapview():
     # creating a map in the view
     
+    
+    #Google Maps API
+    send_url = "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE"
+    geo_req = requests.post(send_url)
+    geo_json = json.loads(geo_req.text)
+    location = geo_json['location']
+    lat = location['lat']
+    lng = location['lng']
+    
+    #IP Stack API
+    #send_url = "http://api.ipstack.com/check?access_key=eafaee99437343b33b25f8b3dda5f942"
+    #geo_req = requests.post(send_url)
+    #geo_json = json.loads(geo_req.text)
+    #lat = geo_json['latitude']
+    #lng = geo_json['longitude']
+    
     mymap = Map(
         identifier="view-side",
-        lat=18.00590323650142,
-        lng=-76.7447443812341,
+        lat=lat,
+        lng=lng,
         markers=[
           {
              'icon': 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
-             'lat': 18.00590323650142,
-             'lng': -76.7447443812341,
+             'lat': lat,
+             'lng': lng,
              'infobox': "<b>Hello World</b>"
-          },
-          {
-             'icon': 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-             'lat': 18.00590323650142,
-             'lng': -76.7447443812341,
-             'infobox': "<b>Hello World from other place</b>"
           }
         ]
     )
     
-    return render_template('mapview.html',mymap=mymap)
+    return render_template('mapview.html',mymap=mymap, lat=lat, lng=lng)
     
 ####################################################################################################################################
+"""
+@app.route('/search', methods=["GET", "POST"])
+def search():
+    if request.method == 'POST' and form.validate_on_submit():
+        
+        apiKey="AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE"
+        address = form.search.data
+        url = ('https://maps.googleapis.com/maps/api/geocode/json?address={}&key={}'.format(address.replace(' ','+'), apiKey))
+    
+    return render_template('search.html')
+"""
+#####################################################################################################################################
 
-# user_loader callback. This callback is used to reload the user object from
-# the user ID stored in the session
-@login_manager.user_loader
-def load_user(id):
-    return UserProfile.query.get(int(id))
+
 
 ###
 # The functions below should be applicable to all Flask apps.
 ###
 
-def generateUserId(firstname, lastname):
+def generateUserId(first_name, last_name):
     temp = re.sub('[.: -]', '', str(datetime.datetime.now()))
     temp = list(temp)
-    temp.extend(list(map(ord,firstname)))
-    temp.extend(list(map(ord,lastname)))
+    temp.extend(list(map(ord,first_name)))
+    temp.extend(list(map(ord,last_name)))
     random.shuffle(temp)
     temp = list(map(str,temp))
     return int("".join(temp[:7]))%10000000 

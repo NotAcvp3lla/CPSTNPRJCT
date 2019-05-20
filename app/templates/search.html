@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+<div class="login-form">
+    <h2></h2>
+    {% include 'flash_messages.html' %}
+    <form action="{{ url_for('searchform') }}" method="post">
+      {{ form.csrf_token }}
+      <div class="form-group">
+        {{ form.search.label }}
+        {{ form.search(class='form-control', placeholder="Enter address") }}
+      </div>
+      
+      <button type="submit" name="submit" class="btn btn-primary">Search</button>
+    </form>
+</div>
+  
+{% endblock %}

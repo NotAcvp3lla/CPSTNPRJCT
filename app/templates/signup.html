@@ -2,11 +2,11 @@
 
 {% block main %}
 <h1>Add Profile</h1>
-<div class = 'container'>
+<div class = 'cont'>
     <form action = "{{url_for('newProfile')}}", method = "POST" enctype="multipart/form-data">
         {{ form.csrf_token }}
         
-      <div class="form-group col-md-6">         
+      <div class="form-group col-md->         
        {{ form.first_name.label }}
         {% for message in form.first_name.errors %}
            <div class="text-danger">{{message}}</div>
@@ -14,7 +14,7 @@
        {{ form.first_name(class='form-control', placeholder="First Name")}} 
       </div>
       
-      <div class="form-group col-md-6">         
+      <div class="form-group">         
        {{ form.last_name.label }}
         {% for message in form.last_name.errors %}
            <div class="text-danger">{{message}}</div>
@@ -23,16 +23,15 @@
        
       </div>
       
-      <div class="form-group col-md-6">         
+      <div class="form-group   
        {{ form.user_name.label }}
         {% for message in form.user_name.errors %}
            <div class="text-danger">{{message}}</div>
            {%endfor%}
-       {{ form.user_name(class='form-control', placeholder="User Name")}}
-       
+       {{ form.user_name(class='form-control', placeholder="First Name")}} 
       </div>
       
-      <div class="form-group col-md-6">         
+      <div class="form-group">         
           {{ form.password.label }}
            {% for message in form.password.errors %}
               <div class="text-danger">{{message}}</div>
@@ -41,7 +40,7 @@
     
       </div>
       
-      <div class="form-group col-md-6">         
+      <div class="form-group">         
          {{ form.gender.label }} 
           {% for message in form.gender.errors %}
            <div class="text-danger">{{message}}</div>

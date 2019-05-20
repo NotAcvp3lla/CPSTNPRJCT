@@ -6,6 +6,46 @@
         <h1>BusNav</h1>
         
         
+
+        <p id="demo"></p>
+        <div id="mapholder"></div>
+        
+        <h2></h2>
+        {{"decoupled-map"|googlemap_html(lat, lng)}}
+
+        {% with map=googlemap_obj("another-map", lat, lng , markers=[( lat, lng), (lat, lng)]) %}
+            {{map.html}}
+            {{map.js}}
+        {% endwith %}
+        
+    
+        
+        
+
+        <script>
+           /* var x = document.getElementById("demo");
+
+            function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            
+            } else { 
+                x.innerHTML = "Geolocation is not supported by this browser.";
+            }
+            }
+
+            function showPosition(position) {
+            var latlon = position.coords.latitude + "," + position.coords.longitude;
+
+            var img_url = "https://maps.googleapis.com/maps/api/staticmap?center="+latlon+"&zoom=14&size=400x300&sensor=false&key=AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE";
+            document.getElementById("mapholder").innerHTML = "<img src='"+img_url+"'>";
+            }
+            */
+        </script>
+        
+        
+        
+        <!---
         <h2>map 1 eg.</h2>
         {{"decoupled-map"|googlemap_html(18.00590323650142, -76.7447443812341)}}
 
@@ -13,7 +53,11 @@
             {{map.html}}
             {{map.js}}
         {% endwith %}
-    
+        
+        <button id = "find-me">Show my location</button><br/>
+        <p id = "status"></p>
+        <a id = "map-link" target="_blank"></a>
+        --->
         
 
 {% endblock %}

@@ -3,12 +3,16 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms.validators import DataRequired, InputRequired
 from wtforms.fields import TextField,TextAreaField,SelectField,PasswordField,BooleanField, StringField, SubmitField
 from wtforms import validators, ValidationError
+import hashlib
 
 
-class LoginForm(FlaskForm):
-    user_name = StringField('Username: ', validators=[InputRequired()])
-    password = PasswordField('Password: ', validators=[InputRequired()])
+class LoginForm(Form):
+    user_name = TextField('Username: ', [validators.Required("(Required)")])
+    password = PasswordField('Password: ', validators=[DataRequired()])
     remember_me = BooleanField('Remember me: ')
+
+class SearchForm(Form):
+    search = TextField('Enter Search: ', [validators.Required("(Required)")])
 
 class ProfileForm(Form):
     first_name = TextField('First Name: ', [validators.Required("(Required)")])

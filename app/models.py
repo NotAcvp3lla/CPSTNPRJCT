@@ -1,15 +1,20 @@
 from . import db
+from werkzeug.security import generate_password_hash
+import hashlib
 
 #################################
 #Add Location to the profile later
 #################################
 
 class UserProfile(db.Model):
+    
+    __tablename__ = 'users'
+    
     uid = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(80))
     last_name = db.Column(db.String(80))
     user_name = db.Column(db.String(255), unique=True)
-    password = db.Column(db.String(255))
+    password = db.Column(db.String(80))
     gender= db.Column(db.String(6))
     email = db.Column(db.String(80))
     role = db.Column(db.String(80))
@@ -20,13 +25,13 @@ class UserProfile(db.Model):
         self.uid=uid
         self.first_name=first_name
         self.last_name=last_name
-        self.user_name
-        self.password
+        self.user_name=user_name
         self.gender=gender
         self.email=email
         self.role=role
         self.isAdmin=isAdmin
         self.image=image
+        self.password = password
 
     def is_authenticated(self):
         return True
@@ -39,9 +44,10 @@ class UserProfile(db.Model):
 
     def get_id(self):
         try:
-            return unicode(self.id)  # python 2 support
+            return unicode(self.uid)  # python 2 support
         except NameError:
-            return str(self.id)  # python 3 support
+            return str(self.uid)  # python 3 support
+
 
     def __repr__(self):
-        return '<User %r>' % (self.username)
+        return '<User %r>' % (self.first_name)

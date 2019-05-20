@@ -9,6 +9,7 @@ Flask-Script
 Flask-Login
 psycopg2
 Flask-Admin
+Werkzeug
 
 # ----------------------
 # Production Server
