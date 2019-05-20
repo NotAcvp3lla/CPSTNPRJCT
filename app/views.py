@@ -9,7 +9,7 @@ import os, datetime, random, re
 from app import app, db,login_manager
 from flask_login import login_user, logout_user, current_user, login_required
 from flask import render_template, request, redirect, url_for,flash,jsonify, make_response,session,abort
-from forms import ProfileForm,LoginForm, SearchForm
+from forms import ProfileForm,LoginForm, SearchForm, DirForm
 from models import UserProfile
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
@@ -21,15 +21,24 @@ from flask import request
 import requests
 import json
 import googlemaps
-from flask_googlemaps import GoogleMaps
+import urllib
+import urllib2
+from geolocation.main import GoogleMaps
 from flask_googlemaps import Map
 import random
 import hashlib
 from googlemaps import exceptions
+from datetime import datetime
+
+
 
 simple_geoip = SimpleGeoIP(app)
 
 _GEOLOCATION_BASE_URL = "https://www.googleapis.com"
+search_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+details_url = "https://maps.googleapis.com/maps/api/place/details/json"
+key = 'AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE'
+
 
 ###
 # Routing for your application.
@@ -221,13 +230,51 @@ def flash_errors(form):
 
 
 ###################################################################################################################################
+def _geolocation_extract(response):
+    """
+    Mimics the exception handling logic in ``client._get_body``, but
+    for geolocation which uses a different response format.
+    """
+    body = response.json()
+    if response.status_code in (200, 404):
+        return body
+
+    try:
+        error = body["error"]["errors"][0]["reason"]
+    except KeyError:
+        error = None
+
+    if response.status_code == 403:
+        raise exceptions._OverQueryLimit(response.status_code, error)
+    else:
+        raise exceptions.ApiError(response.status_code, error)
+
+def geolocate(client, home_mobile_country_code=None, home_mobile_network_code=None, radio_type=None, carrier=None, consider_ip=None, cell_towers=None, wifi_access_points=None):
+    
+    params = {}
+    if home_mobile_country_code is not None:
+        params["homeMobileCountryCode"] = home_mobile_country_code
+    if home_mobile_network_code is not None:
+        params["homeMobileNetworkCode"] = home_mobile_network_code
+    if radio_type is not None:
+        params["radioType"] = radio_type
+    if carrier is not None:
+        params["carrier"] = carrier
+    if consider_ip is not None:
+        params["considerIp"] = consider_ip
+    if cell_towers is not None:
+        params["cellTowers"] = cell_towers
+    if wifi_access_points is not None:
+        params["wifiAccessPoints"] = wifi_access_points
+
+    client._request("/geolocation/v1/geolocate", {}, base_url=_GEOLOCATION_BASE_URL, extract_body=_geolocation_extract,post_json=params)
+    
+
 
 @app.route('/mapview')
 @login_required
 def mapview():
     # creating a map in the view
-    
-    
     #Google Maps API
     send_url = "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE"
     geo_req = requests.post(send_url)
@@ -242,6 +289,12 @@ def mapview():
     #geo_json = json.loads(geo_req.text)
     #lat = geo_json['latitude']
     #lng = geo_json['longitude']
+    
+    
+    
+    
+    
+    
     
     mymap = Map(
         identifier="view-side",
@@ -258,19 +311,142 @@ def mapview():
     )
     
     return render_template('mapview.html',mymap=mymap, lat=lat, lng=lng)
+
+
+
     
 ####################################################################################################################################
-"""
-@app.route('/search', methods=["GET", "POST"])
+@app.route('/search', methods=['GET', 'POST'])
+@login_required
 def search():
-    if request.method == 'POST' and form.validate_on_submit():
-        
-        apiKey="AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE"
-        address = form.search.data
-        url = ('https://maps.googleapis.com/maps/api/geocode/json?address={}&key={}'.format(address.replace(' ','+'), apiKey))
+    form = SearchForm()
+    if request.method == 'GET':
+        return render_template('search.html', form=form)
+    elif request.method == 'POST':
+        query=form.search.data
+        return redirect((url_for('search_results', query=query)))
+
+
+@app.route('/search_results/<query>')
+@login_required
+def search_results(query):
+    form = SearchForm()
     
-    return render_template('search.html')
-"""
+    search_payload = {"key":key, "query":query}
+    search_req = requests.get(search_url, params=search_payload)
+    search_json = search_req.json()
+    place_id = search_json["results"][0]["place_id"]
+    
+    details_payload = {"key":key, "placeid":place_id}
+    details_resp = requests.get(details_url, params=details_payload)
+    details_json = details_resp.json()
+    
+    lat = details_json["result"]["geometry"]["location"]["lat"]
+    lng = details_json["result"]["geometry"]["location"]["lng"]
+    
+    
+    mymap = Map(
+        identifier="view-side",
+        lat=lat,
+        lng=lng,
+        markers=[
+            {
+                'icon': 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                'lat': lat,
+                'lng': lng,
+                'infobox': "<b>Hello World</b>"
+            }
+        ]
+    )
+    
+    return render_template('search_results.html',query=query, mymap=mymap, lat=lat, lng=lng, form=form)
+
+@app.route('/directions', methods=['GET', 'POST'])
+@login_required
+def directions():
+    form = DirForm()
+    if request.method == 'GET':
+        return render_template('directions.html', form=form)
+    elif request.method == 'POST':
+        pointA = form.pointA.data
+        pointB = form.pointB.data
+        return redirect((url_for('destination', pointA=pointA, pointB=pointB)))
+        
+@app.route('/destination/<pointA> <pointB>')
+@login_required
+def destination(pointA,pointB):
+    form = DirForm()
+    
+    query1 = pointA
+    query2 = pointB
+    
+    #"https://maps.googleapis.com/maps/api/directions/json?origin=query1,au&destination=query2,au&waypoints=via:-37.81223%2C144.96254%7Cvia:-34.92788%2C138.60008&key=AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE"
+    #Location1
+    #############################################################
+    search_payload = {"key":key, "query":query1}
+    search_req = requests.get(search_url, params=search_payload)
+    search_json = search_req.json()
+    place_id = search_json["results"][0]["place_id"]
+    
+    details_payload = {"key":key, "placeid":place_id}
+    details_resp = requests.get(details_url, params=details_payload)
+    details_json = details_resp.json()
+    
+    lat1 = details_json["result"]["geometry"]["location"]["lat"]
+    lng1 = details_json["result"]["geometry"]["location"]["lng"]
+    ############################################################
+    
+    #Location2
+    #############################################################
+    search_payload = {"key":key, "query":query2}
+    search_req = requests.get(search_url, params=search_payload)
+    search_json = search_req.json()
+    place_id = search_json["results"][0]["place_id"]
+    
+    details_payload = {"key":key, "placeid":place_id}
+    details_resp = requests.get(details_url, params=details_payload)
+    details_json = details_resp.json()
+    
+    lat2 = details_json["result"]["geometry"]["location"]["lat"]
+    lng2 = details_json["result"]["geometry"]["location"]["lng"]
+    
+    gmaps = googlemaps.Client(key=key)
+    now = datetime.now()
+    dest = gmaps.directions(pointA, pointB,mode="transit",departure_time=now)
+    
+    mymap = Map(
+        identifier="view-side",
+        lat=lat1,
+        lng=lng1,
+        markers=[
+            {
+                'icon': 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                'lat': lat1,
+                'lng': lng1,
+                'infobox': "<b>Hello World</b>"
+            },
+            {
+                'icon': 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                'lat': lat2,
+                'lng': lng2,
+                'infobox': "<b>Hello World</b>"
+            }
+        ]
+    )
+    
+    return render_template('destination.html', pointA=pointA, mymap=mymap, lat1=lat1, lng1=lng1,lat2=lat2, lng2=lng2, dest=dest)
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+
 #####################################################################################################################################
 
 

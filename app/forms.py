@@ -12,7 +12,11 @@ class LoginForm(Form):
     remember_me = BooleanField('Remember me: ')
 
 class SearchForm(Form):
-    search = TextField('Enter Search: ', [validators.Required("(Required)")])
+    search = TextField('', [validators.Required("(Required)")])
+    
+class DirForm(Form):
+    pointA = TextField('From: ', [validators.Required("(Required)")])
+    pointB = TextField('To: ', [validators.Required("(Required)")])
 
 class ProfileForm(Form):
     first_name = TextField('First Name: ', [validators.Required("(Required)")])

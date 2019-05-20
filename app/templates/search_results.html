@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+        
+        {{"decoupled-map"|googlemap_html(lat, lng)}}
+
+        {% with map=googlemap_obj("another-map", lat, lng , markers=[( lat, lng), (lat, lng)]) %}
+            {{map.html}}
+            {{map.js}}
+        {% endwith %}
+        
+        
+    
+  
+{% endblock %}

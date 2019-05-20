@@ -2,18 +2,18 @@
 
 {% block main %}
 
-<div class="login-form">
-    <h2></h2>
-    {% include 'flash_messages.html' %}
-    <form action="{{ url_for('searchform') }}" method="post">
-      {{ form.csrf_token }}
-      <div class="form-group">
-        {{ form.search.label }}
-        {{ form.search(class='form-control', placeholder="Enter address") }}
-      </div>
+        <div class="cont">
+            <h2></h2>
+            {% include 'flash_messages.html' %}
+            <form action="{{ url_for('search') }}" method="post">
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    {{ form.search.label }}
+                    {{ form.search(class='form-control', placeholder="where are you?") }}
+                </div>
       
-      <button type="submit" name="submit" class="btn btn-primary">Search</button>
-    </form>
-</div>
+              <button type="submit" name="submit" class="btn btn-primary btn-block">Search</button>
+            </form>
+        </div>
   
 {% endblock %}

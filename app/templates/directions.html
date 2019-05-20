@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+<div class="cont">
+        <h2></h2>
+            {% include 'flash_messages.html' %}
+            <form action="{{ url_for('directions') }}" method="post">
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    {{ form.pointA.label }}
+                    {{ form.pointA(class='form-control', placeholder="From") }}
+                </div>
+                <div class="form-group">
+                    {{ form.pointB.label }}
+                    {{ form.pointB(class='form-control', placeholder="To") }}
+                </div>
+      
+              <button type="submit" name="submit" class="btn btn-primary btn-block">Search</button>
+            </form>
+    </div>
+    
+{% endblock %}

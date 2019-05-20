@@ -22,12 +22,17 @@
           <a class="nav-link glyphicon glyphicon-user {{active}}" href="{{ url_for('mapview') }}">Location</a>
       </li>
       
-      
-      
       <li class="nav-item">
           <a class="nav-link" href="{{ url_for('profile',uid=current_user.uid) }}">Profile</a>
       </li>
       
+      <li class="nav-item">
+          <a class="nav-link glyphicon glyphicon-user {{active}}" href="{{ url_for('search') }}">Search</a>
+      </li>
+      
+      <li class="nav-item">
+          <a class="nav-link glyphicon glyphicon-user {{active}}" href="{{ url_for('directions') }}">Get Directions</a>
+      </li>
       
       
     </ul>

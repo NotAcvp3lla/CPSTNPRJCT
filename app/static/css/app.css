@@ -9,3 +9,11 @@ body {
 	height: auto;
 	background: #efedf1;
 }
+
+.cont2{
+    border-width: 2px;
+    border-radius: 5px;
+    width : 300px;
+	height: auto;
+	background: #efedf1;
+}
