@@ -15,8 +15,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://tester:password@localhost/
 #app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://super:password@localhost/data"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True # added just to suppress a warning
 
-app.config['GOOGLEMAPS_KEY'] = "AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE"
-app.config['GEOIPIFY_API_KEY'] = "at_PpVkyZVVFxrQyuoWgI4mqMIsXqMdu"
+app.config['GOOGLEMAPS_KEY'] = "keyhere"
+app.config['GEOIPIFY_API_KEY'] = "keyhere"
 
 UPLOAD_FOLDER = './app/static/uploads'
 
