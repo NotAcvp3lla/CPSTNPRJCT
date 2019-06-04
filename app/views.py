@@ -38,7 +38,7 @@ simple_geoip = SimpleGeoIP(app)
 _GEOLOCATION_BASE_URL = "https://www.googleapis.com"
 search_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
 details_url = "https://maps.googleapis.com/maps/api/place/details/json"
-key = 'AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE'
+key = 'key'
 
 
 ###
@@ -219,9 +219,9 @@ def flash_errors(form):
 #@app.route("/locate")
 #def locate():
     
-    #ip_request = request.args.get('https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE/v1/ip.json')
+    #ip_request = request.args.get('https://www.googleapis.com/geolocation/v1/geolocate?key=keyhere/v1/ip.json')
     #my_ip = ip_request.json['ip']
-    #geo_request = request.get('https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE/v1/ip/geo/' +my_ip + '.json')
+    #geo_request = request.get('https://www.googleapis.com/geolocation/v1/geolocate?key=keyhere/v1/ip/geo/' +my_ip + '.json')
     #geo_data = geo_request.json
     
     #lat = geo_data['latitude']
@@ -277,7 +277,7 @@ def geolocate(client, home_mobile_country_code=None, home_mobile_network_code=No
 def mapview():
     # creating a map in the view
     #Google Maps API
-    send_url = "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBpR7ifpmENecBIWXWMyZ2Xmin7FoHDaIE"
+    send_url = "https://www.googleapis.com/geolocation/v1/geolocate?key=keyhere"
     geo_req = requests.post(send_url)
     geo_json = json.loads(geo_req.text)
     location = geo_json['location']
@@ -285,7 +285,7 @@ def mapview():
     lng = location['lng']
     
     #IP Stack API
-    #send_url = "http://api.ipstack.com/check?access_key=eafaee99437343b33b25f8b3dda5f942"
+    #send_url = "http://api.ipstack.com/check?access_key=keyhere"
     #geo_req = requests.post(send_url)
     #geo_json = json.loads(geo_req.text)
     #lat = geo_json['latitude']
